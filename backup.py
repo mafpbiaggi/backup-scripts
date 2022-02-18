@@ -6,7 +6,7 @@ from email.mime.text import MIMEText
 from datetime import date
 import smtplib, os
 
-# Define all variables
+# SMTP config data
 SMTP_SERVER = ""
 SMTP_PORT = ""
 SMTP_USERNAME = ""
@@ -16,9 +16,10 @@ EMAIL_TO = ""
 EMAIL_FROM = ""
 EMAIL_SUBJECT = "[<companyname>] - BACKUP SERVIDOR: <servername>"
 
+# Date format for logging
 DATE_FORMAT = "%d/%m/%Y"
 
-# Data sources
+# Sources
 SRC1 = "/etc"
 SRC2 = "/dados"
 
@@ -28,15 +29,18 @@ DEST = "/mnt/backup"
 # Log file
 LOG_FILE = "/etc/scripts/backup.log"
 
-# Synchronize data
+# Start backup routine
 os.system("echo > " + LOG_FILE)
 
+# Check if external disk is mounted. If not, then mount it.
 if os.path.ismount("/mnt") is False:
     os.system("mount -t ext4 /dev/disk/by-uuid/<UUID> /mnt")
 
+# Copy only differential data from sources to destination using rsync
 os.system("rsync -aAr --log-file '" + LOG_FILE + "' --delete-excluded " + SRC1 + " " + DEST)
 os.system("rsync -aAr --log-file '" + LOG_FILE + "' --delete-excluded " + SRC2 + " " + DEST)
 
+# After copy, umount destination mount point
 os.system("umount /mnt")
 
 # Open log file and append to message
